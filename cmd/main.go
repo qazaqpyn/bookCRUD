@@ -1,6 +1,11 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	bookcrud "github.com/qazaqpyn/bookCRUD"
 	"github.com/qazaqpyn/bookCRUD/pkg/handler"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
@@ -25,8 +30,23 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(bookcrud.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err.Error())
+	//Graceful shutdown implementation
+	go func() {
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
+
+	logrus.Print("BOOKCRUD started\n")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Print("BOOKCRUD shutting down")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error occured while shutting down server: %s", err.Error())
 	}
 }
 

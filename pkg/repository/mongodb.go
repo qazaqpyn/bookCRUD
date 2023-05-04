@@ -29,12 +29,6 @@ func NewMongodb(db string) (*mongo.Database, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// err = client.Connect(ctx)
-	// if err == nil {
-	// 	log.Fatal(err)
-	// 	return nil, err
-	// }
-
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, err
