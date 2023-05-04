@@ -1,1 +1,5 @@
 port: "8080"
+mongo:
+  name: "TESGO"
+  user: "User"
+  book: "Book"

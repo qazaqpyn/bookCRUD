@@ -7,8 +7,8 @@ import (
 )
 
 type Book struct {
-	Id          primitive.ObjectID `json:"id"`
-	Name        string             `json:"name"`
+	Id          primitive.ObjectID `json:"_id,omitempty"`
+	Name        string             `json:"name" binding:"required"`
 	Author      string             `json:"author"`
 	Description string             `json:"description"`
 	Year        time.Time          `json:"year"`

@@ -20,7 +20,7 @@ func (s *Server) Run(port string, handler http.Handler) error {
 		WriteTimeout:   10 * time.Second,
 	}
 
-	fmt.Printf("SERVER STARTED ON PORT: %s", port)
+	fmt.Printf("SERVER STARTED ON PORT: %s\n", port)
 	return s.httpServer.ListenAndServe()
 }
 
