@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qazaqpyn/bookCRUD/model"
+	"github.com/sirupsen/logrus"
 )
 
 // @Summary CreateBook
@@ -23,12 +24,20 @@ func (h *Handler) createBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"handler": "creteBook",
+			"problem": "authentication error",
+		}).Error("user id not found")
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "createBook",
+			"problem": "BindJSON error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -36,6 +45,10 @@ func (h *Handler) createBook(c *gin.Context) {
 	//service
 	err := h.services.Create(c, input)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "createBook",
+			"problem": "service error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -62,12 +75,20 @@ func (h *Handler) getBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"handler": "getBook",
+			"problem": "authentication error",
+		}).Error("user id not found")
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "getBook",
+			"problem": "BindJSON error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -75,6 +96,10 @@ func (h *Handler) getBook(c *gin.Context) {
 	//service
 	book, err := h.services.GetById(c, input.Id)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "getBook",
+			"problem": "service error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -98,12 +123,20 @@ func (h *Handler) getBook(c *gin.Context) {
 func (h *Handler) getBooks(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"handler": "getBooks",
+			"problem": "Authentication error",
+		}).Error("user id not found")
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	books, err := h.services.GetAll(c)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "getBooks",
+			"problem": "service error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -130,12 +163,20 @@ func (h *Handler) updateBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"handler": "updateBook",
+			"problem": "authentication error",
+		}).Error("user id not found")
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "updateBook",
+			"problem": "BindJSON error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -143,6 +184,10 @@ func (h *Handler) updateBook(c *gin.Context) {
 	//service
 	err := h.services.Update(c, input.Id, &input)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "updateBook",
+			"problem": "service error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -168,12 +213,20 @@ func (h *Handler) deleteBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"handler": "deleteBook",
+			"problem": "authentication error",
+		}).Error("user id not found")
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "deleteBook",
+			"problem": "BindJSON error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -181,6 +234,10 @@ func (h *Handler) deleteBook(c *gin.Context) {
 	//service
 	book, err := h.services.GetById(c, input.Id)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"handler": "deleteBook",
+			"problem": "service error",
+		}).Error(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
