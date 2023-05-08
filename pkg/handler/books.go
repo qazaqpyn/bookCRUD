@@ -7,6 +7,18 @@ import (
 	"github.com/qazaqpyn/bookCRUD/model"
 )
 
+// @Summary CreateBook
+// @Description	Create a book
+// @Security ApiKeyAuth
+// @Tags books
+// @Accept json
+// @Produce	json
+// @Param input body model.Book true "book details"
+// @Success	200	{string} string "book created"
+// @Failure	400 {object} errorResponse
+// @Failure	404	{object}	errorResponse
+// @Failure	500	{object} errorResponse
+// @Router /api/books/ [post]
 func (h *Handler) createBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
@@ -33,6 +45,19 @@ func (h *Handler) createBook(c *gin.Context) {
 	})
 }
 
+// @Summary GetBook
+// @Description	Get a book
+// @Security ApiKeyAuth
+// @Tags books
+// @Accept json
+// @Produce	json
+// @Param input body model.Book true "book details"
+// @Param id	path int true "Account ID"
+// @Success	200	{object} model.Book
+// @Failure	400 {object} errorResponse
+// @Failure	404	{object}	errorResponse
+// @Failure	500	{object} errorResponse
+// @Router /api/books/{id} [get]
 func (h *Handler) getBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
@@ -59,6 +84,17 @@ func (h *Handler) getBook(c *gin.Context) {
 	})
 }
 
+// @Summary GetBooks
+// @Description	Get books
+// @Security ApiKeyAuth
+// @Tags books
+// @Accept json
+// @Produce	json
+// @Success	200	{array} model.Book
+// @Failure	400 {object} errorResponse
+// @Failure	404	{object}	errorResponse
+// @Failure	500	{object} errorResponse
+// @Router /api/books/ [get]
 func (h *Handler) getBooks(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 	if !ok {
@@ -77,6 +113,19 @@ func (h *Handler) getBooks(c *gin.Context) {
 	})
 }
 
+// @Summary UpdateBook
+// @Description	Update a book
+// @Security ApiKeyAuth
+// @Tags books
+// @Accept json
+// @Produce	json
+// @Param input body model.Book true "book details"
+// @Param id	path int true "book ID"
+// @Success	200	{string} string
+// @Failure	400 {object} errorResponse
+// @Failure	404	{object}	errorResponse
+// @Failure	500	{object} errorResponse
+// @Router /api/books/{id} [put]
 func (h *Handler) updateBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
@@ -103,6 +152,18 @@ func (h *Handler) updateBook(c *gin.Context) {
 	})
 }
 
+// @Summary DeleteBook
+// @Description	delete a book
+// @Security ApiKeyAuth
+// @Tags books
+// @Accept json
+// @Produce	json
+// @Param id	path int true "book ID"
+// @Success	200	{object} model.Book
+// @Failure	400 {object} errorResponse
+// @Failure	404	{object}	errorResponse
+// @Failure	500	{object} errorResponse
+// @Router /api/books/{id} [delete]
 func (h *Handler) deleteBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 

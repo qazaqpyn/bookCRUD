@@ -14,6 +14,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+//	@title			Book CRUD API
+//	@version		1.0
+//	@description	This is a simple server for CRUD operations on book.
+
+//	@contact.name	API Support
+//	@contact.email	alimkali.alizhan@gmail.com
+
+//	@host		localhost:8080
+//	@BasePath	/
+
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @description				Token-based authentication
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
