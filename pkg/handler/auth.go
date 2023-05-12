@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qazaqpyn/bookCRUD/model"
-	"github.com/sirupsen/logrus"
 )
 
 type signInput struct {
@@ -28,10 +27,7 @@ func (h *Handler) signup(c *gin.Context) {
 	var input model.User
 
 	if err := c.BindJSON(&input); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handler": "signup",
-			"problem": "BindJSON error",
-		}).Error(err)
+		logError("signup", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -39,10 +35,7 @@ func (h *Handler) signup(c *gin.Context) {
 	//have push down our parsed data to service level
 	err := h.services.CreateUser(c, input)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handler": "signup",
-			"problem": "service error",
-		}).Error(err)
+		logError("signup", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
@@ -66,10 +59,7 @@ func (h *Handler) login(c *gin.Context) {
 	var input signInput
 
 	if err := c.BindJSON(&input); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handler": "login",
-			"problem": "BindJSON error",
-		}).Error(err)
+		logError("login", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -77,10 +67,7 @@ func (h *Handler) login(c *gin.Context) {
 	//have push down our parsed data to service level
 	token, err := h.services.GenerateToken(c, input.Email, input.Password)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"handler": "login",
-			"problem": "service error",
-		}).Error(err)
+		logError("login", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
