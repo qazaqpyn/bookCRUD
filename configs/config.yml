@@ -3,3 +3,4 @@ mongo:
   name: "TESGO"
   user: "User"
   book: "Book"
+  token: "Refresher"

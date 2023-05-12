@@ -22,14 +22,21 @@ type Book interface {
 	DeleteBook(ctx context.Context, id primitive.ObjectID) error
 }
 
+type Tokens interface {
+	Create(ctx context.Context, token model.RefreshSession) error
+	Get(ctx context.Context, token string) (model.RefreshSession, error)
+}
+
 type Repository struct {
 	Authorization
 	Book
+	Tokens
 }
 
 func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
 		Authorization: NewAuthRepository(db, viper.GetString("mongo.user")),
 		Book:          NewBookRepository(db, viper.GetString("mongo.book")),
+		Tokens:        NewTokensRepository(db, viper.GetString("mongo.token")),
 	}
 }

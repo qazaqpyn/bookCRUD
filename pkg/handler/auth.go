@@ -1,16 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qazaqpyn/bookCRUD/model"
 )
-
-type signInput struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
 
 // @Summary			SignUp
 // @Description		Sign up with user details
@@ -56,7 +53,7 @@ func (h *Handler) signup(c *gin.Context) {
 // @Failure	500	{object} errorResponse
 // @Router /auth/login [post]
 func (h *Handler) login(c *gin.Context) {
-	var input signInput
+	var input model.LoginInput
 
 	if err := c.BindJSON(&input); err != nil {
 		logError("login", err)
@@ -65,14 +62,45 @@ func (h *Handler) login(c *gin.Context) {
 	}
 
 	//have push down our parsed data to service level
-	token, err := h.services.GenerateToken(c, input.Email, input.Password)
+	accessToken, refreshToken, err := h.services.SignIn(c, input)
 	if err != nil {
 		logError("login", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"token": token,
+	response, err := json.Marshal(map[string]string{
+		"token": accessToken,
+	})
+	if err != nil {
+		logError("login", err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Header("Set-Cookie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) refresh(c *gin.Context) {
+	cookie, err := c.Cookie("refresh-token")
+	if err != nil {
+		logError("refresh", err)
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	accessToken, refreshToken, err := h.services.RefreshTokens(c, cookie)
+	if err != nil {
+		logError("refresh", err)
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.Header("Set-Cokie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, map[string]string{
+		"token": accessToken,
 	})
 }
