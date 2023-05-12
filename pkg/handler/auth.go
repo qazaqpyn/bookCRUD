@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -62,7 +61,7 @@ func (h *Handler) login(c *gin.Context) {
 	}
 
 	//have push down our parsed data to service level
-	accessToken, refreshToken, err := h.services.SignIn(c, input)
+	session_id, err := h.services.SignIn(c, input)
 	if err != nil {
 		logError("login", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -70,7 +69,7 @@ func (h *Handler) login(c *gin.Context) {
 	}
 
 	response, err := json.Marshal(map[string]string{
-		"token": accessToken,
+		"session_id": session_id,
 	})
 	if err != nil {
 		logError("login", err)
@@ -78,29 +77,6 @@ func (h *Handler) login(c *gin.Context) {
 		return
 	}
 
-	c.Header("Set-Cookie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
 	c.Header("Content-Type", "application/json")
 	c.JSON(http.StatusOK, response)
-}
-
-func (h *Handler) refresh(c *gin.Context) {
-	cookie, err := c.Cookie("refresh-token")
-	if err != nil {
-		logError("refresh", err)
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	accessToken, refreshToken, err := h.services.RefreshTokens(c, cookie)
-	if err != nil {
-		logError("refresh", err)
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	c.Header("Set-Cokie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
-	c.Header("Content-Type", "application/json")
-	c.JSON(http.StatusOK, map[string]string{
-		"token": accessToken,
-	})
 }

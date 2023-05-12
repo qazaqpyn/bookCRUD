@@ -10,9 +10,8 @@ import (
 
 type Authorization interface {
 	CreateUser(ctx context.Context, user model.User) error
-	SignIn(ctx context.Context, inp model.LoginInput) (string, string, error)
-	ParseToken(ctx context.Context, token string) (primitive.ObjectID, error)
-	RefreshTokens(ctx context.Context, refreshToken string) (string, string, error)
+	SignIn(ctx context.Context, inp model.LoginInput) (string, error)
+	CheckSessionID(ctx context.Context, session_id string) error
 }
 
 type Book interface {

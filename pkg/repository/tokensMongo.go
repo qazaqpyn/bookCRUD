@@ -27,11 +27,11 @@ func (t *TokensRepository) Create(ctx context.Context, token model.RefreshSessio
 	return nil
 }
 
-func (t *TokensRepository) Get(ctx context.Context, token string) (model.RefreshSession, error) {
+func (t *TokensRepository) Get(ctx context.Context, session_id string) (model.RefreshSession, error) {
 	tok := new(model.RefreshSession)
 
 	err := t.db.FindOne(ctx, bson.M{
-		"token": token,
+		"session_id": session_id,
 	}).Decode(tok)
 	if err != nil {
 		return *tok, err

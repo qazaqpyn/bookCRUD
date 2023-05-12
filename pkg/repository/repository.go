@@ -23,8 +23,8 @@ type Book interface {
 }
 
 type Tokens interface {
-	Create(ctx context.Context, token model.RefreshSession) error
-	Get(ctx context.Context, token string) (model.RefreshSession, error)
+	Create(ctx context.Context, session model.RefreshSession) error
+	Get(ctx context.Context, session_id string) (model.RefreshSession, error)
 }
 
 type Repository struct {

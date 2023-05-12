@@ -8,7 +8,6 @@ import (
 
 type RefreshSession struct {
 	Id        primitive.ObjectID `json:"_id,omitempty"`
-	UserID    primitive.ObjectID `json:"user_id"`
-	Token     string             `json:"token"`
+	SessionId primitive.ObjectID `json:"session_id"`
 	ExpiresAt time.Time
 }

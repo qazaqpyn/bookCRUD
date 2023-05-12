@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/qazaqpyn/bookCRUD/model"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,15 +17,9 @@ type AuthService struct {
 	repo *repository.Repository
 }
 
-type TokenClaim struct {
-	jwt.StandardClaims
-	UserID primitive.ObjectID `json:"user_id"`
-}
-
 const (
-	tokenTTL   = 12 * time.Minute
-	salt       = "sdf12341asd_3423resdf1"
-	signingKey = "asdjfji12#$fdo13__34123joisdf"
+	sessionTtl = 12 * time.Minute
+	salt       = "ahsjdf1412_0293@sifnsHIUfb123UHI"
 )
 
 func NewAuthService(repo *repository.Repository) *AuthService {
@@ -49,47 +42,31 @@ func generatePasswordHash(password string) string {
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
-func (s *AuthService) SignIn(ctx context.Context, inp model.LoginInput) (string, string, error) {
+func (s *AuthService) SignIn(ctx context.Context, inp model.LoginInput) (string, error) {
 	password := generatePasswordHash(inp.Password)
 
-	user, err := s.repo.Authorization.GetUser(ctx, inp.Email, password)
+	_, err := s.repo.Authorization.GetUser(ctx, inp.Email, password)
 	if err != nil {
-		return "", "", nil
+		return "", nil
 	}
 
-	return s.GenerateTokens(ctx, user.Id)
+	return generateSession()
 }
 
-func (s *AuthService) GenerateTokens(ctx context.Context, userId primitive.ObjectID) (string, string, error) {
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Subject:   userId.Hex(),
-		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(tokenTTL).Unix(),
-	})
-
-	accessToken, err := t.SignedString([]byte(salt))
+func (s *AuthService) CheckSessionID(ctx context.Context, session_id string) error {
+	sess, err := s.repo.Tokens.Get(ctx, session_id)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
-	refreshToken, err := newRefreshToken()
-	if err != nil {
-		return "", "", err
+	if sess.ExpiresAt.Unix() < time.Now().Unix() {
+		return errors.New("session_id is expired login again")
 	}
 
-	if err := s.repo.Tokens.Create(ctx, model.RefreshSession{
-		UserID:    userId,
-		Token:     refreshToken,
-		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
-	}); err != nil {
-		return "", "", err
-	}
-
-	return accessToken, refreshToken, nil
-
+	return nil
 }
 
-func newRefreshToken() (string, error) {
+func generateSession() (string, error) {
 	b := make([]byte, 32)
 
 	s := rand.NewSource(time.Now().Unix())
@@ -100,51 +77,4 @@ func newRefreshToken() (string, error) {
 	}
 
 	return fmt.Sprintf("%x", b), nil
-}
-
-func (s AuthService) RefreshTokens(ctx context.Context, refreshToken string) (string, string, error) {
-	session, err := s.repo.Tokens.Get(ctx, refreshToken)
-	if err != nil {
-		return "", "", err
-	}
-
-	if session.ExpiresAt.Unix() < time.Now().Unix() {
-		return "", "", errors.New("refresh token expired")
-	}
-
-	return s.GenerateTokens(ctx, session.UserID)
-}
-
-func (s *AuthService) ParseToken(ctx context.Context, token string) (primitive.ObjectID, error) {
-	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(signingKey), nil
-	})
-	if err != nil {
-		return primitive.NilObjectID, err
-	}
-
-	if !t.Valid {
-		return primitive.NilObjectID, errors.New("invalid token")
-	}
-
-	claims, ok := t.Claims.(jwt.MapClaims)
-	if !ok {
-		return primitive.NilObjectID, errors.New("token are not *TokenClaim types")
-	}
-
-	subject, ok := claims["sub"].(string)
-	if !ok {
-		return primitive.NilObjectID, errors.New("invalid object")
-	}
-
-	id, err := primitive.ObjectIDFromHex(subject)
-	if err != nil {
-		return primitive.NilObjectID, errors.New("invalid subject")
-	}
-	return id, nil
-
 }
