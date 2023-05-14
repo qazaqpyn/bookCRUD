@@ -5,6 +5,7 @@ import (
 
 	"github.com/qazaqpyn/bookCRUD/model"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
+	audit "github.com/qazaqpyn/crud-audit-log/pkg/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -28,9 +29,13 @@ type Service struct {
 	Book
 }
 
-func NewService(repos *repository.Repository) *Service {
+type AuditClient interface {
+	SendLogRequest(ctx context.Context, req audit.LogItem) error
+}
+
+func NewService(repos *repository.Repository, audit AuditClient) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos),
-		Book:          NewBookRepository(repos),
+		Authorization: NewAuthService(repos, audit),
+		Book:          NewBookRepository(repos, audit),
 	}
 }

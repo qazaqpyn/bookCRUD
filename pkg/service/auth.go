@@ -10,12 +10,15 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/qazaqpyn/bookCRUD/model"
+	"github.com/qazaqpyn/bookCRUD/pkg/logging"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
+	audit "github.com/qazaqpyn/crud-audit-log/pkg/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthService struct {
-	repo *repository.Repository
+	repo        *repository.Repository
+	auditClient AuditClient
 }
 
 type TokenClaim struct {
@@ -29,9 +32,10 @@ const (
 	signingKey = "asdjfji12#$fdo13__34123joisdf"
 )
 
-func NewAuthService(repo *repository.Repository) *AuthService {
+func NewAuthService(repo *repository.Repository, auditClient AuditClient) *AuthService {
 	return &AuthService{
-		repo: repo,
+		repo:        repo,
+		auditClient: auditClient,
 	}
 }
 
@@ -39,7 +43,20 @@ func (s *AuthService) CreateUser(ctx context.Context, user model.User) error {
 	user.Password = generatePasswordHash(user.Password)
 	user.Id = primitive.NewObjectID()
 
-	return s.repo.CreateUser(ctx, &user)
+	if err := s.repo.CreateUser(ctx, &user); err != nil {
+		return err
+	}
+
+	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+		Action:    audit.ACTION_CREATE,
+		Entity:    audit.ENTITY_USER,
+		EntityID:  user.Id.Hex(),
+		Timestamp: time.Now(),
+	}); err != nil {
+		logging.LogError("Users.SignUp", err)
+	}
+
+	return nil
 }
 
 func generatePasswordHash(password string) string {
@@ -57,7 +74,21 @@ func (s *AuthService) SignIn(ctx context.Context, inp model.LoginInput) (string,
 		return "", "", nil
 	}
 
-	return s.GenerateTokens(ctx, user.Id)
+	accessToken, refreshToken, err := s.GenerateTokens(ctx, user.Id)
+	if err != nil {
+		return "", "", nil
+	}
+
+	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+		Action:    audit.ACTION_LOGIN,
+		Entity:    audit.ENTITY_USER,
+		EntityID:  user.Id.Hex(),
+		Timestamp: time.Now(),
+	}); err != nil {
+		logging.LogError("Users.SignIn", err)
+	}
+
+	return accessToken, refreshToken, nil
 }
 
 func (s *AuthService) GenerateTokens(ctx context.Context, userId primitive.ObjectID) (string, string, error) {
