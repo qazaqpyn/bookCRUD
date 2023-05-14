@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qazaqpyn/bookCRUD/model"
+	"github.com/qazaqpyn/bookCRUD/pkg/logging"
 )
 
 // @Summary CreateBook
@@ -24,7 +25,7 @@ func (h *Handler) createBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
-		logError("createBook", errors.New("user id not found"))
+		logging.LogError("createBook", errors.New("user id not found"))
 
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
@@ -32,7 +33,7 @@ func (h *Handler) createBook(c *gin.Context) {
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
-		logError("createBook", err)
+		logging.LogError("createBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -40,7 +41,7 @@ func (h *Handler) createBook(c *gin.Context) {
 	//service
 	err := h.services.Create(c, input)
 	if err != nil {
-		logError("createBook", err)
+		logging.LogError("createBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -67,14 +68,14 @@ func (h *Handler) getBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
-		logError("getBook", errors.New("user id not found"))
+		logging.LogError("getBook", errors.New("user id not found"))
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
-		logError("createBook", err)
+		logging.LogError("createBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -82,7 +83,7 @@ func (h *Handler) getBook(c *gin.Context) {
 	//service
 	book, err := h.services.GetById(c, input.Id)
 	if err != nil {
-		logError("createBook", err)
+		logging.LogError("createBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -106,14 +107,14 @@ func (h *Handler) getBook(c *gin.Context) {
 func (h *Handler) getBooks(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 	if !ok {
-		logError("getBooks", errors.New("user id not found"))
+		logging.LogError("getBooks", errors.New("user id not found"))
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	books, err := h.services.GetAll(c)
 	if err != nil {
-		logError("getBooks", err)
+		logging.LogError("getBooks", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -140,14 +141,14 @@ func (h *Handler) updateBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
-		logError("updateBook", errors.New("user id not found"))
+		logging.LogError("updateBook", errors.New("user id not found"))
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
-		logError("updateBook", err)
+		logging.LogError("updateBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -155,7 +156,7 @@ func (h *Handler) updateBook(c *gin.Context) {
 	//service
 	err := h.services.Update(c, input.Id, &input)
 	if err != nil {
-		logError("updateBook", err)
+		logging.LogError("updateBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -181,14 +182,14 @@ func (h *Handler) deleteBook(c *gin.Context) {
 	_, ok := c.Get(userCtx)
 
 	if !ok {
-		logError("deleteBook", errors.New("user id not found"))
+		logging.LogError("deleteBook", errors.New("user id not found"))
 		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
 	var input model.Book
 	if err := c.BindJSON(&input); err != nil {
-		logError("deleteBook", err)
+		logging.LogError("deleteBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -196,7 +197,7 @@ func (h *Handler) deleteBook(c *gin.Context) {
 	//service
 	book, err := h.services.GetById(c, input.Id)
 	if err != nil {
-		logError("deleteBook", err)
+		logging.LogError("deleteBook", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

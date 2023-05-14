@@ -1,4 +1,4 @@
-package handler
+package logging
 
 import "github.com/sirupsen/logrus"
 
@@ -8,6 +8,6 @@ func logFields(handler string) logrus.Fields {
 	}
 }
 
-func logError(handler string, err error) {
+func LogError(handler string, err error) {
 	logrus.WithFields(logFields(handler)).Error(err)
 }

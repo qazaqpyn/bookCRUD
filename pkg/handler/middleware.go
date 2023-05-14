@@ -25,9 +25,11 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	err := h.services.CheckSessionID(c, headerParts[1])
+	userId, err := h.services.CheckSessionID(c, headerParts[1])
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
+
+	c.Set(userCtx, userId)
 }

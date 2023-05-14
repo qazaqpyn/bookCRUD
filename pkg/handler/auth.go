@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qazaqpyn/bookCRUD/model"
+	"github.com/qazaqpyn/bookCRUD/pkg/logging"
 )
 
 // @Summary			SignUp
@@ -23,7 +24,7 @@ func (h *Handler) signup(c *gin.Context) {
 	var input model.User
 
 	if err := c.BindJSON(&input); err != nil {
-		logError("signup", err)
+		logging.LogError("signup", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -31,7 +32,7 @@ func (h *Handler) signup(c *gin.Context) {
 	//have push down our parsed data to service level
 	err := h.services.CreateUser(c, input)
 	if err != nil {
-		logError("signup", err)
+		logging.LogError("signup", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
@@ -55,7 +56,7 @@ func (h *Handler) login(c *gin.Context) {
 	var input model.LoginInput
 
 	if err := c.BindJSON(&input); err != nil {
-		logError("login", err)
+		logging.LogError("login", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -63,7 +64,7 @@ func (h *Handler) login(c *gin.Context) {
 	//have push down our parsed data to service level
 	session_id, err := h.services.SignIn(c, input)
 	if err != nil {
-		logError("login", err)
+		logging.LogError("login", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -72,7 +73,7 @@ func (h *Handler) login(c *gin.Context) {
 		"session_id": session_id,
 	})
 	if err != nil {
-		logError("login", err)
+		logging.LogError("login", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

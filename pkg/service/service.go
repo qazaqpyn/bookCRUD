@@ -11,7 +11,7 @@ import (
 type Authorization interface {
 	CreateUser(ctx context.Context, user model.User) error
 	SignIn(ctx context.Context, inp model.LoginInput) (string, error)
-	CheckSessionID(ctx context.Context, session_id string) error
+	CheckSessionID(ctx context.Context, session_id string) (string, error)
 }
 
 type Book interface {
@@ -27,9 +27,9 @@ type Service struct {
 	Book
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repos *repository.Repository, audit AuditClient) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos),
-		Book:          NewBookRepository(repos),
+		Authorization: NewAuthService(repos, audit),
+		Book:          NewBookRepository(repos, audit),
 	}
 }

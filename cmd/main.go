@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	bookcrud "github.com/qazaqpyn/bookCRUD"
 	"github.com/qazaqpyn/bookCRUD/pkg/handler"
+	grpc_client "github.com/qazaqpyn/bookCRUD/pkg/handler/grpc"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
 	"github.com/qazaqpyn/bookCRUD/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -40,7 +42,14 @@ func main() {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+
+	auditClient, err := grpc_client.NewClient(9000)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	services := service.NewService(repos, auditClient)
+
 	handlers := handler.NewHandler(services)
 
 	srv := new(bookcrud.Server)
@@ -61,6 +70,10 @@ func main() {
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured while shutting down server: %s", err.Error())
+	}
+
+	if err := auditClient.CloseConnection(); err != nil {
+		logrus.Errorf("error occured while shutting down gRPC client: %s", err.Error())
 	}
 }
 
