@@ -17,8 +17,8 @@ import (
 )
 
 type AuthService struct {
-	repo        *repository.Repository
-	auditClient AuditClient
+	repo  *repository.Repository
+	queue RabbitMQServer
 }
 
 type TokenClaim struct {
@@ -32,10 +32,10 @@ const (
 	signingKey = "asdjfji12#$fdo13__34123joisdf"
 )
 
-func NewAuthService(repo *repository.Repository, auditClient AuditClient) *AuthService {
+func NewAuthService(repo *repository.Repository, queue RabbitMQServer) *AuthService {
 	return &AuthService{
-		repo:        repo,
-		auditClient: auditClient,
+		repo:  repo,
+		queue: queue,
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *AuthService) CreateUser(ctx context.Context, user model.User) error {
 		return err
 	}
 
-	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+	if err := s.queue.SendToQueue(model.Msg{
 		Action:    audit.ACTION_CREATE,
 		Entity:    audit.ENTITY_USER,
 		EntityID:  user.Id.Hex(),
@@ -79,7 +79,7 @@ func (s *AuthService) SignIn(ctx context.Context, inp model.LoginInput) (string,
 		return "", "", nil
 	}
 
-	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+	if err := s.queue.SendToQueue(model.Msg{
 		Action:    audit.ACTION_LOGIN,
 		Entity:    audit.ENTITY_USER,
 		EntityID:  user.Id.Hex(),
