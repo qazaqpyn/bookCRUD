@@ -33,9 +33,13 @@ type AuditClient interface {
 	SendLogRequest(ctx context.Context, req audit.LogItem) error
 }
 
-func NewService(repos *repository.Repository, audit AuditClient) *Service {
+type RabbitMQServer interface {
+	SendToQueue(msg model.Msg) error
+}
+
+func NewService(repos *repository.Repository, queue RabbitMQServer, audit AuditClient) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos, audit),
+		Authorization: NewAuthService(repos, queue),
 		Book:          NewBookRepository(repos, audit),
 	}
 }

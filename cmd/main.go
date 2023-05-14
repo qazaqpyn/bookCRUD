@@ -10,6 +10,7 @@ import (
 	bookcrud "github.com/qazaqpyn/bookCRUD"
 	"github.com/qazaqpyn/bookCRUD/pkg/handler"
 	grpc_client "github.com/qazaqpyn/bookCRUD/pkg/handler/grpc"
+	rabbitmq "github.com/qazaqpyn/bookCRUD/pkg/handler/rabbitMQ"
 	"github.com/qazaqpyn/bookCRUD/pkg/repository"
 	"github.com/qazaqpyn/bookCRUD/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -49,7 +50,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	services := service.NewService(repos, auditClient)
+	uri := os.Getenv("RABBITMQ")
+
+	queueServer, err := rabbitmq.NewServer(uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	services := service.NewService(repos, queueServer, auditClient)
 
 	handlers := handler.NewHandler(services)
 

@@ -8,6 +8,8 @@ require (
 	google.golang.org/grpc v1.55.0
 )
 
+require github.com/streadway/amqp v1.0.0 // indirect
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.2.0 // indirect
