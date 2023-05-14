@@ -5,7 +5,9 @@
 - Loggin logrus
 - Swagger
 - Cookies Authentication
-- Audit Log service gRPC Client with Message Queue
+- Audit Log service gRPC Client or Message Queue
+
+[Authentication processes use message queue and Book processes use gRPC for audit log]
 
 ## Start RabbitMQ with Docker
 ```
